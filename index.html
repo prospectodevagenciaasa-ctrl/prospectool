@@ -338,7 +338,7 @@
                 <button class="retry-button" onclick="location.reload()">Tentar Novamente</button>
             </div>
 
-            <div class="tip">
+            <div class="tip" id="tip-box">
                 <div class="tip-title">Dica Importante</div>
                 <p class="tip-text">Mantenha esta página aberta até que a conexão seja estabelecida com sucesso.</p>
             </div>
@@ -494,6 +494,7 @@
             document.getElementById('qr-display').classList.add('hidden');
             document.getElementById('qr-success').classList.remove('hidden');
             document.getElementById('qr-error').classList.add('hidden');
+            document.getElementById('tip-box').classList.add('hidden');
         }
         
         showError(message) {
