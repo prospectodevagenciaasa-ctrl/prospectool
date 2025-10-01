@@ -143,12 +143,7 @@
             }
         }
 
-        .timer-display {
-            font-size: 18px;
-            font-weight: bold;
-            color: #667eea;
-            margin-top: 15px;
-        }
+
 
         .success-icon {
             width: 80px;
@@ -335,10 +330,6 @@
                     </div>
                 </div>
                 
-                <div class="timer-display">
-                    Expira em: <span id="timer-display">00:30</span>
-                </div>
-                
                 <div class="status" id="qr-status">
                     <span class="status-dot"></span>
                     <span>Aguardando conexão...</span>
@@ -518,15 +509,11 @@
         }
         
         updateTimer() {
+            // Timer continua rodando em background para controlar renovações
+            // mas não exibe mais para o usuário
             if (this.timeLeft <= 0) {
-                // Não renova aqui, apenas espera o timeout agendado
                 return;
             }
-            
-            const minutes = Math.floor(this.timeLeft / 60);
-            const seconds = this.timeLeft % 60;
-            document.getElementById('timer-display').textContent = 
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             
             if (this.timeLeft === 10 && this.renewCounter < this.maxRenewals) {
                 this.updateStatusMessage('⚠️ QR Code será renovado em breve...');
