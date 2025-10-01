@@ -75,23 +75,16 @@
             font-size: 14px;
         }
 
-        .qr-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 30px;
-            border-radius: 15px;
-            margin: 30px 0;
-            display: inline-block;
-        }
-
         .qr-placeholder {
             width: 280px;
             height: 280px;
             background: white;
-            border-radius: 10px;
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
 
         #qr-image {
@@ -312,10 +305,8 @@
             
             <!-- Loading -->
             <div id="qr-loading" class="hidden">
-                <div class="qr-box">
-                    <div class="qr-placeholder">
-                        <div class="spinner"></div>
-                    </div>
+                <div class="qr-placeholder" style="margin: 30px auto;">
+                    <div class="spinner"></div>
                 </div>
                 <div class="status">
                     <span>Gerando QR Code...</span>
@@ -324,10 +315,8 @@
 
             <!-- QR Code Display -->
             <div id="qr-display" class="hidden">
-                <div class="qr-box">
-                    <div class="qr-placeholder">
-                        <img id="qr-image" src="" alt="QR Code WhatsApp">
-                    </div>
+                <div class="qr-placeholder" style="margin: 30px auto;">
+                    <img id="qr-image" src="" alt="QR Code WhatsApp">
                 </div>
                 
                 <div class="status" id="qr-status">
@@ -453,8 +442,14 @@
                 if (data.connected) {
                     console.log('WhatsApp já está conectado!');
                     this.showSuccess();
+                } else if (data.qrCode) {
+                    // Se já existe um QR Code gerado, usa ele
+                    console.log('QR Code já existe, utilizando o existente...');
+                    this.startTimer();
+                    this.showQRCode(data.qrCode);
                 } else {
-                    console.log('WhatsApp não conectado, gerando QR Code...');
+                    // Gera novo QR Code apenas se não existir
+                    console.log('WhatsApp não conectado, gerando novo QR Code...');
                     this.startTimer();
                     this.fetchQRCode();
                 }
@@ -486,10 +481,6 @@
             
             // Agenda renovação (apenas UMA vez)
             this.scheduleRenewal();
-            
-            if (this.renewCounter > 0) {
-                this.updateStatusMessage(`⏳ QR Code renovado (${this.renewCounter}/${this.maxRenewals})`);
-            }
         }
         
         showSuccess() {
@@ -513,10 +504,6 @@
             // mas não exibe mais para o usuário
             if (this.timeLeft <= 0) {
                 return;
-            }
-            
-            if (this.timeLeft === 10 && this.renewCounter < this.maxRenewals) {
-                this.updateStatusMessage('⚠️ QR Code será renovado em breve...');
             }
             
             this.timeLeft--;
@@ -633,8 +620,6 @@
                 console.log('Renovando QR Code...');
                 this.renewCounter++;
                 
-                this.updateStatusMessage('🔄 Renovando QR Code...');
-                
                 // CRÍTICO: Para tudo antes de renovar
                 this.clearAllIntervals();
                 
@@ -661,15 +646,12 @@
                     if (this.renewCounter < this.maxRenewals) {
                         this.scheduleRenewal();
                     }
-                    
-                    this.updateStatusMessage(`✅ QR Code renovado (${this.renewCounter}/${this.maxRenewals})`);
                 } else {
                     throw new Error(data.message || 'Falha ao renovar QR Code');
                 }
                 
             } catch (error) {
                 console.error('Erro ao renovar QR Code:', error);
-                this.updateStatusMessage('❌ Erro ao renovar QR Code');
                 
                 if (this.renewCounter < this.maxRenewals) {
                     console.log('Tentando novamente em 10 segundos...');
