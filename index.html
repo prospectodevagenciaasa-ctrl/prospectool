@@ -1,51 +1,426 @@
-<html>
-    <head>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conectar WhatsApp - Automação de Prospecção</title>
     <style>
-    /* CSS para inserir no construtor Bitrix */
-    .spinner {
-        width: 40px;
-        height: 40px;
-        border: 4px solid #f0f0f0;
-        border-top: 4px solid #25D366;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin: 0 auto 15px;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
 
-    #qr-container {
-        max-width: 400px;
-        margin: 0 auto;
-        padding: 20px;
-    }
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            animation: fadeIn 0.6s ease-in;
+        }
 
-    #qr-success div:first-child {
-        animation: pulse 0.6s ease-in-out;
-    }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    @keyframes pulse {
-        0% { transform: scale(0.8); }
-        50% { transform: scale(1.1); }
-        100% { transform: scale(1); }
-    }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .qr-section {
+            text-align: center;
+        }
+
+        .logo {
+            margin-bottom: 25px;
+        }
+
+        .logo img {
+            max-width: 250px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .qr-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            display: inline-block;
+        }
+
+        .qr-placeholder {
+            width: 280px;
+            height: 280px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #qr-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f0f0f0;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: #f7fafc;
+            border-radius: 25px;
+            margin-top: 20px;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #48bb78;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .timer-display {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 15px;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #48bb78;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+            animation: successPulse 0.6s ease-in-out;
+        }
+
+        @keyframes successPulse {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .success-message {
+            color: #48bb78;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .error-message {
+            color: #f56565;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .retry-button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+
+        .retry-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .tutorial-section h2 {
+            color: #2d3748;
+            font-size: 22px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tutorial-section h2::before {
+            content: "📱";
+            font-size: 28px;
+        }
+
+        .step {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 12px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .step:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .step-number {
+            min-width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .step-content h3 {
+            color: #2d3748;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .step-content p {
+            color: #718096;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .tip {
+            background: #f0fff4;
+            border-left: 4px solid #48bb78;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .tip-title {
+            color: #22543d;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tip-title::before {
+            content: "💡";
+        }
+
+        .tip-text {
+            color: #276749;
+            font-size: 13px;
+        }
+
+        @media (max-width: 968px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .qr-placeholder {
+                width: 220px;
+                height: 220px;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Seção QR Code -->
+        <div class="card qr-section">
+            <div class="logo">
+                <img src="https://cdn.bitrix24.com.br/b35096437/landing/cc1/cc138659055b4aac599a86544fcf85c7/sem_nome_180_x_60_px_360_x_120_px_1x.png" alt="Automação de Prospecção">
+            </div>
+            <h1>Conecte seu WhatsApp</h1>
+            <p class="subtitle">Escaneie o QR Code abaixo para começar</p>
+            
+            <!-- Loading -->
+            <div id="qr-loading" class="hidden">
+                <div class="qr-box">
+                    <div class="qr-placeholder">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+                <div class="status">
+                    <span>Gerando QR Code...</span>
+                </div>
+            </div>
+
+            <!-- QR Code Display -->
+            <div id="qr-display" class="hidden">
+                <div class="qr-box">
+                    <div class="qr-placeholder">
+                        <img id="qr-image" src="" alt="QR Code WhatsApp">
+                    </div>
+                </div>
+                
+                <div class="timer-display">
+                    Expira em: <span id="timer-display">00:30</span>
+                </div>
+                
+                <div class="status" id="qr-status">
+                    <span class="status-dot"></span>
+                    <span>Aguardando conexão...</span>
+                </div>
+            </div>
+
+            <!-- Success -->
+            <div id="qr-success" class="hidden">
+                <div class="success-icon">✓</div>
+                <div class="success-message">Conectado com sucesso!</div>
+                <p class="subtitle">Seu WhatsApp foi conectado e está pronto para usar.</p>
+            </div>
+
+            <!-- Error -->
+            <div id="qr-error" class="hidden">
+                <div class="error-message" id="error-text">❌ Erro ao gerar QR Code</div>
+                <button class="retry-button" onclick="location.reload()">Tentar Novamente</button>
+            </div>
+
+            <div class="tip">
+                <div class="tip-title">Dica Importante</div>
+                <p class="tip-text">Mantenha esta página aberta até que a conexão seja estabelecida com sucesso.</p>
+            </div>
+        </div>
+
+        <!-- Seção Tutorial -->
+        <div class="card tutorial-section">
+            <h2>Como Conectar</h2>
+            
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Abra o WhatsApp no seu celular</h3>
+                    <p>Certifique-se de que você tem o WhatsApp instalado e atualizado em seu dispositivo móvel.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Acesse as configurações</h3>
+                    <p>Toque nos três pontos no canto superior direito (Android) ou vá em Configurações (iPhone).</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Selecione "Aparelhos Conectados"</h3>
+                    <p>No menu de configurações, toque em "Aparelhos Conectados" ou "WhatsApp Web".</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>Toque em "Conectar um aparelho"</h3>
+                    <p>Você verá a câmera do seu celular ativada para escanear o QR Code.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h3>Escaneie o QR Code</h3>
+                    <p>Aponte a câmera para o QR Code exibido na tela à esquerda até que seja reconhecido automaticamente.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-    // JavaScript para inserir no construtor Bitrix
     class WhatsAppQRConnector {
         constructor() {
             this.token = this.getTokenFromURL();
-            this.timeLeft = 30; // 30 segundos
+            this.timeLeft = 30;
             this.checkInterval = null;
             this.timerInterval = null;
-            this.renewInterval = null;
-            this.renewAfter = 25; // Renova após 25 segundos (5 segundos antes do vencimento)
+            this.renewTimeout = null;
+            this.renewAfter = 25;
             this.renewCounter = 0;
-            this.maxRenewals = 10; // Máximo 10 renovações automáticas
+            this.maxRenewals = 10;
             this.apiBaseUrl = 'https://workflow.agenciaasa.com.br/webhook';
             this.init();
         }
@@ -57,7 +432,6 @@
         
         init() {
             console.log('Inicializando WhatsAppQRConnector...');
-            console.log('URL atual:', window.location.href);
             console.log('Token encontrado:', this.token);
             
             if (!this.token) {
@@ -67,57 +441,54 @@
             
             this.startTimer();
             this.fetchQRCode();
-            this.scheduleRenewal();
         }
         
         showLoading() {
-            document.getElementById('qr-loading').style.display = 'block';
-            document.getElementById('qr-display').style.display = 'none';
-            document.getElementById('qr-success').style.display = 'none';
-            document.getElementById('qr-error').style.display = 'none';
+            document.getElementById('qr-loading').classList.remove('hidden');
+            document.getElementById('qr-display').classList.add('hidden');
+            document.getElementById('qr-success').classList.add('hidden');
+            document.getElementById('qr-error').classList.add('hidden');
         }
         
         showQRCode(qrImageData) {
-            // Limpa intervalos anteriores antes de mostrar novo QR
-            if (this.checkInterval) clearInterval(this.checkInterval);
+            // CRÍTICO: Limpa TODOS os intervalos antes de mostrar novo QR
+            this.clearAllIntervals();
             
-            document.getElementById('qr-loading').style.display = 'none';
-            document.getElementById('qr-display').style.display = 'block';
+            document.getElementById('qr-loading').classList.add('hidden');
+            document.getElementById('qr-display').classList.remove('hidden');
             document.getElementById('qr-image').src = qrImageData;
             
+            // Inicia verificação de status (apenas UMA vez)
             this.startStatusCheck();
             
-            // Mostra contador de renovações se houver
+            // Agenda renovação (apenas UMA vez)
+            this.scheduleRenewal();
+            
             if (this.renewCounter > 0) {
-                this.updateStatusMessage(`⏳ QR Code renovado automaticamente (${this.renewCounter}/${this.maxRenewals})`);
+                this.updateStatusMessage(`⏳ QR Code renovado (${this.renewCounter}/${this.maxRenewals})`);
             }
         }
         
         showSuccess() {
             this.clearAllIntervals();
-            document.getElementById('qr-display').style.display = 'none';
-            document.getElementById('qr-success').style.display = 'block';
+            document.getElementById('qr-display').classList.add('hidden');
+            document.getElementById('qr-success').classList.remove('hidden');
         }
         
         showError(message) {
             this.clearAllIntervals();
-            document.getElementById('qr-loading').style.display = 'none';
-            document.getElementById('qr-display').style.display = 'none';
-            document.getElementById('qr-error').style.display = 'block';
+            document.getElementById('qr-loading').classList.add('hidden');
+            document.getElementById('qr-display').classList.add('hidden');
+            document.getElementById('qr-error').classList.remove('hidden');
             if (message) {
-                document.querySelector('#qr-error p').textContent = '❌ ' + message;
+                document.getElementById('error-text').textContent = '❌ ' + message;
             }
         }
         
         updateTimer() {
             if (this.timeLeft <= 0) {
-                if (this.renewCounter < this.maxRenewals) {
-                    this.renewQRCode();
-                    return;
-                } else {
-                    this.showError('QR Code expirado. Máximo de renovações atingido.');
-                    return;
-                }
+                // Não renova aqui, apenas espera o timeout agendado
+                return;
             }
             
             const minutes = Math.floor(this.timeLeft / 60);
@@ -125,7 +496,6 @@
             document.getElementById('timer-display').textContent = 
                 `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             
-            // Aviso quando restam 10 segundos
             if (this.timeLeft === 10 && this.renewCounter < this.maxRenewals) {
                 this.updateStatusMessage('⚠️ QR Code será renovado em breve...');
             }
@@ -134,29 +504,28 @@
         }
         
         startTimer() {
+            // Limpa timer anterior se existir
+            if (this.timerInterval) {
+                clearInterval(this.timerInterval);
+                this.timerInterval = null;
+            }
+            
             this.updateTimer();
             this.timerInterval = setInterval(() => this.updateTimer(), 1000);
         }
         
         async fetchQRCode() {
             try {
-                console.log('Iniciando busca do QR Code...');
-                console.log('Token:', this.token);
-                console.log('URL:', `${this.apiBaseUrl}/qrcode?token=${this.token}`);
-                
+                console.log('Buscando QR Code...');
                 this.showLoading();
                 
                 const response = await fetch(`${this.apiBaseUrl}/qrcode?token=${this.token}`);
-                
-                console.log('Response status:', response.status);
-                console.log('Response ok:', response.ok);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 
                 const data = await response.json();
-                console.log('Response data:', data);
                 
                 if (data.success && data.qrCode) {
                     this.showQRCode(data.qrCode);
@@ -186,72 +555,70 @@
         }
         
         startStatusCheck() {
-            // Garante que não há verificação anterior rodando
+            // CRÍTICO: Garante que não há verificação anterior
             if (this.checkInterval) {
                 clearInterval(this.checkInterval);
                 this.checkInterval = null;
             }
             
-            console.log('Iniciando verificação de status...');
+            console.log('Iniciando verificação de status (intervalo único)');
             this.checkInterval = setInterval(() => this.checkStatus(), 3000);
         }
         
         clearAllIntervals() {
+            console.log('Limpando todos os intervalos...');
+            
             if (this.timerInterval) {
                 clearInterval(this.timerInterval);
                 this.timerInterval = null;
             }
+            
             if (this.checkInterval) {
                 clearInterval(this.checkInterval);
                 this.checkInterval = null;
             }
-            if (this.renewInterval) {
-                clearTimeout(this.renewInterval);
-                this.renewInterval = null;
+            
+            if (this.renewTimeout) {
+                clearTimeout(this.renewTimeout);
+                this.renewTimeout = null;
             }
-            console.log('Todos os intervalos foram limpos');
         }
         
         updateStatusMessage(message) {
             const statusElement = document.getElementById('qr-status');
             if (statusElement) {
-                statusElement.innerHTML = message;
+                statusElement.innerHTML = `<span class="status-dot"></span><span>${message}</span>`;
             }
         }
         
         scheduleRenewal() {
-            // Limpa agendamento anterior se existir
-            if (this.renewInterval) {
-                clearTimeout(this.renewInterval);
-                this.renewInterval = null;
+            // CRÍTICO: Limpa timeout anterior
+            if (this.renewTimeout) {
+                clearTimeout(this.renewTimeout);
+                this.renewTimeout = null;
             }
             
-            console.log(`Agendando renovação para ${this.renewAfter} segundos...`);
-            this.renewInterval = setTimeout(() => {
-                if (this.renewCounter < this.maxRenewals) {
-                    this.renewQRCode();
-                }
+            if (this.renewCounter >= this.maxRenewals) {
+                console.log('Máximo de renovações atingido');
+                return;
+            }
+            
+            console.log(`Agendando renovação para ${this.renewAfter} segundos (apenas uma vez)...`);
+            this.renewTimeout = setTimeout(() => {
+                this.renewQRCode();
             }, this.renewAfter * 1000);
         }
         
         async renewQRCode() {
             try {
-                console.log('Renovando QR Code automaticamente...');
+                console.log('Renovando QR Code...');
                 this.renewCounter++;
                 
-                this.updateStatusMessage('🔄 Renovando QR Code automaticamente...');
+                this.updateStatusMessage('🔄 Renovando QR Code...');
                 
-                // Para TODOS os intervalos atuais
-                if (this.checkInterval) {
-                    clearInterval(this.checkInterval);
-                    this.checkInterval = null;
-                }
-                if (this.renewInterval) {
-                    clearTimeout(this.renewInterval);
-                    this.renewInterval = null;
-                }
+                // CRÍTICO: Para tudo antes de renovar
+                this.clearAllIntervals();
                 
-                // Usa o mesmo endpoint para renovação
                 const response = await fetch(`${this.apiBaseUrl}/qrcode?token=${this.token}`);
                 
                 if (!response.ok) {
@@ -261,22 +628,22 @@
                 const data = await response.json();
                 
                 if (data.success && data.qrCode) {
-                    // Reset do timer para 30 segundos
+                    // Reset do timer
                     this.timeLeft = 30;
+                    this.startTimer();
                     
-                    // Atualiza o QR Code
+                    // Atualiza imagem
                     document.getElementById('qr-image').src = data.qrCode;
                     
-                    // Reinicia verificações (já limpa intervalos anteriores)
+                    // Reinicia verificações (showQRCode já limpa intervalos)
                     this.startStatusCheck();
                     
-                    // Agenda próxima renovação se não atingiu o limite
+                    // Agenda próxima renovação
                     if (this.renewCounter < this.maxRenewals) {
                         this.scheduleRenewal();
                     }
                     
                     this.updateStatusMessage(`✅ QR Code renovado (${this.renewCounter}/${this.maxRenewals})`);
-                    
                 } else {
                     throw new Error(data.message || 'Falha ao renovar QR Code');
                 }
@@ -285,58 +652,20 @@
                 console.error('Erro ao renovar QR Code:', error);
                 this.updateStatusMessage('❌ Erro ao renovar QR Code');
                 
-                // Se falhou, tenta renovação manual após 10 segundos (apenas se ainda não atingiu limite)
                 if (this.renewCounter < this.maxRenewals) {
-                    setTimeout(() => {
-                        this.renewQRCode();
-                    }, 10000);
+                    console.log('Tentando novamente em 10 segundos...');
+                    this.renewTimeout = setTimeout(() => this.renewQRCode(), 10000);
                 }
             }
         }
     }
 
-    // Inicializar quando a página carregar
-    document.addEventListener('DOMContentLoaded', function() {
-        new WhatsAppQRConnector();
-    });
-
-    // Fallback caso DOMContentLoaded já tenha disparado
+    // Inicialização
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            new WhatsAppQRConnector();
-        });
+        document.addEventListener('DOMContentLoaded', () => new WhatsAppQRConnector());
     } else {
         new WhatsAppQRConnector();
     }
     </script>
-    </head>
-    <body>
-        <div id="qr-container">
-            <div id="qr-loading" style="text-align: center; display: none;">
-                <div class="spinner"></div>
-                <p>Gerando QR Code...</p>
-            </div>
-            
-            <div id="qr-display" style="text-align: center; display: none;">
-                <img id="qr-image" src="" alt="QR Code WhatsApp" style="max-width: 250px; width: 100%; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                <div id="qr-timer" style="margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 8px; font-weight: bold;">
-                    Expira em: <span id="timer-display">00:30</span>
-                </div>
-                <div id="qr-status" style="padding: 12px; margin: 10px 0; border-radius: 8px; background: #fff3cd; color: #856404; border: 1px solid #ffeaa7;">
-                    ⏳ Aguardando escaneamento do QR Code
-                </div>
-            </div>
-            
-            <div id="qr-success" style="text-align: center; display: none;">
-                <div style="width: 60px; height: 60px; background: #25D366; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: white; font-size: 30px;">✓</div>
-                <h3 style="color: #25D366; margin-bottom: 10px;">Conectado!</h3>
-                <p style="color: #666;">Seu WhatsApp foi conectado com sucesso.</p>
-            </div>
-            
-            <div id="qr-error" style="text-align: center; display: none; color: #dc3545;">
-                <p>❌ Erro ao gerar QR Code ou token expirado</p>
-                <button onclick="location.reload()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px;">Tentar Novamente</button>
-            </div>
-        </div>
-    </body>
+</body>
 </html>
