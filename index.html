@@ -430,7 +430,7 @@
             return urlParams.get('token');
         }
         
-        init() {
+        async init() {
             console.log('Inicializando WhatsAppQRConnector...');
             console.log('Token encontrado:', this.token);
             
@@ -439,8 +439,40 @@
                 return;
             }
             
-            this.startTimer();
-            this.fetchQRCode();
+            // Verifica se já está conectado antes de gerar QR Code
+            await this.checkInitialStatus();
+        }
+        
+        async checkInitialStatus() {
+            try {
+                console.log('Verificando status inicial da conexão...');
+                this.showLoading();
+                
+                const response = await fetch(`${this.apiBaseUrl}/qrcode-status?token=${this.token}`);
+                
+                if (!response.ok) {
+                    console.log('Erro ao verificar status, gerando QR Code...');
+                    this.startTimer();
+                    this.fetchQRCode();
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (data.connected) {
+                    console.log('WhatsApp já está conectado!');
+                    this.showSuccess();
+                } else {
+                    console.log('WhatsApp não conectado, gerando QR Code...');
+                    this.startTimer();
+                    this.fetchQRCode();
+                }
+            } catch (error) {
+                console.error('Erro ao verificar status inicial:', error);
+                // Em caso de erro, gera o QR Code normalmente
+                this.startTimer();
+                this.fetchQRCode();
+            }
         }
         
         showLoading() {
